@@ -1,17 +1,18 @@
-import { MMKVLoader, useMMKVStorage } from 'react-native-mmkv-storage';
-const Storage = new MMKVLoader().initialize();
-const loadFrom = async(key:string):Promise<string>=>{
-    var result = await Storage.getStringAsync('key');
-    if(result==null){
-        console.error('position is null?')
-        return('')
-    }else if(result==undefined){
-        console.error('position is undefined?');
-        return('');
-    }
-    return(result)
+
+const loadFrom = (key:string):string=>{
+    return('')
 }
-const saveTo = async(item:string,key:string)=>{
-    await Storage.setStringAsync(key,item)
+const saveTo = (item:string,key:string)=>{
 }
+
+/*
+all data
+tabs[] group of notes(map)
+    tab[array of task objects]
+        task
+            title
+            color?
+            time?
+*/
+
 export {loadFrom,saveTo}
