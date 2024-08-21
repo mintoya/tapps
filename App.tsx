@@ -5,6 +5,7 @@ import { TouchableView } from './components/touchableView';
 import colors from './assets/colors';
 import Svg, { Path } from 'react-native-svg'
 import Task from './components/task';
+import { tests } from './components/storage';
 
 export default function App() {
   const taskname = "taskList1";
