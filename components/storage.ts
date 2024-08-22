@@ -88,9 +88,12 @@ const loadFrom = (key:string):string=>{
         }
     }
 }
-const initializeTabs = ()=>{
+const initializeStorage = ()=>{
+    clearStorage()
     let tabs: Map<string, string> = new Map<string, string>()
     saveItem("tabs", tabs)
+    createTab("Main Tab")
+    
 }
 const saveTo = (item:string,key:string)=>{
     if(Platform.OS!='web'){
@@ -153,7 +156,7 @@ const getTasks = (tabname:string):Array<Record<string,any>>=>{
 
 const tests = ()=>{
     clearStorage()
-    initializeTabs()
+    initializeStorage()
     console.log(loadItem("tabs"),"loaditem print")
     createTab("tab1")
     let taskindex = createTask('tab1',
@@ -189,8 +192,9 @@ const tests = ()=>{
         }
     )
 }
-//tests()
+//initializeStorage()
+tests()
 
 
 
-export {tests,createTab,getTab,getTabs,getTasks,createTask,initializeTabs,loadItem}
+export {tests,createTab,getTab,getTabs,getTasks,createTask,initializeStorage,loadItem}

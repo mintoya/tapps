@@ -7,7 +7,6 @@ import Svg, { Path } from 'react-native-svg'
 import {TaskListFromTab,Task, taskList} from './components/task';
 import { createTask, tests,loadItem, getTabs } from './components/storage';
 import { effect, useSignal } from '@preact/signals-react';
-import { EventArgs } from 'react-native/Libraries/Performance/Systrace';
 
 
 export default function App() {
@@ -21,6 +20,9 @@ export default function App() {
   function tabchange(){
     setSelectVisible(!selectTabVisible)
   }
+  useEffect(()=>{
+    setalltasks(taskList(currentTab))
+  },[currentTab])
   // useEffect(()=>{setalltasks(TaskListFromTab(currentTab))},[allTasks])
   return (
     <View style={styles.container}>
@@ -79,16 +81,24 @@ const Tabs = (tabName: string,tabchanger:any): ReactNode => {
   )
 }
 const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:any,topSpace:number):ReactNode=>{
+  function useTabSet(tab:string){
+    return(function(){
+      tabSet(tab)
+    })
+  }
   type ItemProps = { title: string };
   const Item = ({ title }: ItemProps) => (
-    <View style={{
+    <TouchableView style={{
       backgroundColor: colors.deepBlue,
-    }}>
+    }}
+    onPress={useTabSet(title)}
+    >
+      
       <Text style={{
         color: colors.urple,
         fontSize: 25,
       }}>{title}</Text>
-    </View>
+    </TouchableView>
   );
   let DATA: Array<any>= [];
   getTabs().forEach(
@@ -104,7 +114,7 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
     <Modal
     visible = {visible}
     transparent = {true}
-    animationType='slide'
+    animationType='fade'
     onRequestClose={visibleChanger}
     >
       <Pressable key = "viewcloesr" style={{width:'100%',height:'100%'}} onPress={visibleChanger}>
