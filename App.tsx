@@ -1,17 +1,31 @@
 import { StatusBar } from 'expo-status-bar';
-import { ReactNode, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ReactNode, useEffect, useState } from 'react';
+import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { TouchableView } from './components/touchableView';
 import colors from './assets/colors';
 import Svg, { Path } from 'react-native-svg'
-import Task from './components/task';
-import { tests } from './components/storage';
+import {TaskListFromTab,Task, taskList} from './components/task';
+import { createTask, tests,loadItem, getTabs } from './components/storage';
+import { effect, useSignal } from '@preact/signals-react';
+import { EventArgs } from 'react-native/Libraries/Performance/Systrace';
+
 
 export default function App() {
-  const taskname = "taskList1";
+  const [currentTab,setTab] = useState('tab1')
+  const [allTasks,setalltasks] = useState<Record<string,any>[]>(()=>taskList(currentTab))
+  const [selectTabVisible,setSelectVisible] = useState(false)
+  function addtask(task:Record<string,any>){
+    createTask(currentTab,task)
+    setalltasks(taskList(currentTab))
+  }
+  function tabchange(){
+    setSelectVisible(!selectTabVisible)
+  }
+  // useEffect(()=>{setalltasks(TaskListFromTab(currentTab))},[allTasks])
   return (
     <View style={styles.container}>
-      {Tabs(taskname)}
+      {modalTabs(currentTab,setTab,selectTabVisible,tabchange,80)}
+      {Tabs(currentTab,tabchange)}
       <View
         id="notes+createnote"
         style={{
@@ -25,15 +39,16 @@ export default function App() {
           flex: 1
         }}
       >
-        {taSkroll()}
+        <TaSkroll tasks={allTasks} />
         <View id="padding" style={{ flex: 1 }}></View>
-        {newTask()}
+        {newTask(currentTab,addtask)}
       </View>
+      
       <StatusBar hidden={true} style="auto" />
     </View>
   );
 }
-const Tabs = (tabName: string): ReactNode => {
+const Tabs = (tabName: string,tabchanger:any): ReactNode => {
   return (
     <View
       style={{
@@ -50,7 +65,7 @@ const Tabs = (tabName: string): ReactNode => {
         }}
       >{tabName}</Text>
       <TouchableView
-        onPress={() => { console.log('tabcall') }}
+        onPress={tabchanger}
         style={{
           marginRight: 10,
           padding: 20,
@@ -63,8 +78,70 @@ const Tabs = (tabName: string): ReactNode => {
     </View>
   )
 }
-const newTask = (): ReactNode => {
-  const [text,setText] = useState('New...')
+const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:any,topSpace:number):ReactNode=>{
+  type ItemProps = { title: string };
+  const Item = ({ title }: ItemProps) => (
+    <View style={{
+      backgroundColor: colors.deepBlue,
+    }}>
+      <Text style={{
+        color: colors.urple,
+        fontSize: 25,
+      }}>{title}</Text>
+    </View>
+  );
+  let DATA: Array<any>= [];
+  getTabs().forEach(
+    (tabindex:string,tab:string)=>{
+      DATA.push({
+        title:tab,
+        id:tabindex
+      })
+    }
+  )
+
+  return(
+    <Modal
+    visible = {visible}
+    transparent = {true}
+    animationType='slide'
+    onRequestClose={visibleChanger}
+    >
+      <Pressable key = "viewcloesr" style={{width:'100%',height:'100%'}} onPress={visibleChanger}>
+      <TouchableView
+      onPress={()=>{}}
+      style = {{
+        marginTop:topSpace,
+        borderRadius:20,
+        marginHorizontal:'auto',
+        width:'95%',
+        height:'50%',
+        maxHeight:1000,
+        minHeight:400,
+        padding:20,
+        backgroundColor:colors.deepBlue
+      }}
+      >
+        <FlatList
+          data={DATA}
+          renderItem={({ item }) => <Item title={item.title} />}
+          keyExtractor={item => item.id}
+        />
+      </TouchableView>
+      </Pressable>
+
+    </Modal>
+  )
+}
+
+const newTask = (currentTab:string,something:any): ReactNode => {
+  function makeNote() {
+    something({
+      title:nttext,
+      color:"#fff"
+    })
+  }
+  const [nttext,setText] = useState('New...')
   return (
     <View
       style={{
@@ -85,11 +162,12 @@ const newTask = (): ReactNode => {
           padding: 20,
           marginLeft: 'auto',
         }}
-        value={text}
+        multiline = {true}
+        value={nttext}
         onChangeText={setText}
       />
       <TouchableView
-        onPress={() => { console.log('tabcall') }}
+        onPress= {makeNote}
         style={{
           marginRight: 10,
           marginBottom: 3,
@@ -103,7 +181,7 @@ const newTask = (): ReactNode => {
     </View>
   )
 }
-const taSkroll = (): ReactNode => {
+const TaSkroll = ({tasks}:{tasks:Array<Record<string,any>>}): ReactNode => {
   return (
       <ScrollView
       style ={{
@@ -120,6 +198,7 @@ const taSkroll = (): ReactNode => {
           flexWrap: 'wrap',
           width: '100%',
         }}>
+          {TaskListFromTab(tasks)}
         </View>
 
       </ScrollView>

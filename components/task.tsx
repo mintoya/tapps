@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Text,View } from "react-native";
 import { TouchableView } from "./touchableView";
 import colors from "../assets/colors";
+import { initializeTabs, getTasks, createTab } from "./storage";
 
 /*
 structure
@@ -10,7 +11,7 @@ structure
     color?
     time?
 */
-const Task = (data:Record<string,any>):ReactNode=>{
+const Task = ({data}:{data:Record<string,any>}):ReactNode=>{
     var hasTime:Boolean = false
     var hasColor:Boolean = false
     if(data.time){hasTime=true}
@@ -21,29 +22,22 @@ const Task = (data:Record<string,any>):ReactNode=>{
             backgroundColor:colors.liteBlue,
             flexGrow:1,
             borderRadius:10,
-            flexDirection:'row',
+            flexDirection:'column',
             margin:20,
             alignItems:'center',
             padding:10,
         }}
         >
+            <View
+            style = {{flexDirection:'row'}}>
             <Text
             style={{
                 color:'white',
-                fontSize:25,
+                fontSize:18,
+                marginRight:10,
             }}
             >{data.title}</Text>
-            {hasTime?(
-                <Text
-                style={{
-                    color:'white',
-                    fontSize:15,
-                    marginHorizontal:5,
-                }}>{data.time}</Text>
-                ):(
-                <View></View>
-                )
-            }
+
             {hasColor?(
                 <TouchableView
                 style={{
@@ -59,9 +53,43 @@ const Task = (data:Record<string,any>):ReactNode=>{
                 <View></View>
                 )
             }
+        </View>
+
+            {hasTime?(
+                <Text
+                style={{
+                    color:'white',
+                    fontSize:8,
+                    marginHorizontal:5,
+                }}>{data.time}</Text>
+                ):(
+                <View></View>
+                )
+            }
         </TouchableView>
     )
 
 }
-
-export default Task
+const taskList = (tabName:string):Array<Record<string,any>>=>{
+    var tasks = new Array<Record<string,any>>
+    try {
+        tasks = getTasks(tabName)
+    } catch (error) {
+        if(!(error instanceof Error)){
+            throw error
+        }
+        if(error.message==='tab doesnt exist'){
+            createTab(tabName)
+        }
+        tasks = getTasks(tabName)
+    }
+    return tasks
+}
+const TaskListFromTab = (tasklist:Record<string,any>[])=>{
+    var taskItems = new Array<ReactNode>
+    for(let t of tasklist){
+        taskItems.push(<Task key ={t.adress} data = {t}/>)
+    }
+    return taskItems
+}
+export {Task,TaskListFromTab,taskList}
