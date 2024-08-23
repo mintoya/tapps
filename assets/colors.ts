@@ -6,5 +6,6 @@ const colors = {
     range:'#ddbb88',
     lowYellow:'#ffeebb',
     ellow:'#efd700',
+    trasnparent:'#FFFFFF00',
   }
 export default colors

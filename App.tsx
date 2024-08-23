@@ -1,10 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
-import { ReactNode, useEffect, useState } from 'react';
+import { JSX, JSXElementConstructor, ReactElement, ReactNode, useEffect, useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { TouchableView } from './components/touchableView';
 import colors from './assets/colors';
 import Svg, { Path } from 'react-native-svg'
-import {TaskListFromTab,Task, taskList} from './components/task';
+import {TaskListFromTab,Task, taskList, taskEditor} from './components/task';
 import { createTask, tests,loadItem, getTabs } from './components/storage';
 import { effect, useSignal } from '@preact/signals-react';
 
@@ -12,7 +12,9 @@ import { effect, useSignal } from '@preact/signals-react';
 export default function App() {
   const [currentTab,setTab] = useState('tab1')
   const [allTasks,setalltasks] = useState<Record<string,any>[]>(()=>taskList(currentTab))
-  const [selectTabVisible,setSelectVisible] = useState(false)
+  const [selectTabVisible,setSelectVisible] = useState(true)
+  const [editing,seteditingMode] = useState(false)
+  const [currentTask,setCurrentTask]= useState<string>('task1')
   function addtask(task:Record<string,any>){
     createTask(currentTab,task)
     setalltasks(taskList(currentTab))
@@ -20,9 +22,20 @@ export default function App() {
   function tabchange(){
     setSelectVisible(!selectTabVisible)
   }
+  function editorToggle(tabName:string){
+    if(typeof tabName !='string'){
+      console.log('undefinedToggle')
+      seteditingMode(!editing)
+    }else{
+      console.log('definedToggle',tabName)
+      setCurrentTask(tabName)
+      seteditingMode(!editing)
+    }
+    
+  }
   useEffect(()=>{
     setalltasks(taskList(currentTab))
-  },[currentTab])
+  },[currentTab,editing])
   // useEffect(()=>{setalltasks(TaskListFromTab(currentTab))},[allTasks])
   return (
     <View style={styles.container}>
@@ -41,9 +54,10 @@ export default function App() {
           flex: 1
         }}
       >
-        <TaSkroll tasks={allTasks} />
+        {taskEditor(currentTask,editorToggle,editing)}
+        <TaSkroll tasks={allTasks} onTask = {editorToggle} />
         <View id="padding" style={{ flex: 1 }}></View>
-        {newTask(currentTab,addtask)}
+        {newTask(currentTab,addtask,!editing)}
       </View>
       
       <StatusBar hidden={true} style="auto" />
@@ -84,12 +98,16 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
   function useTabSet(tab:string){
     return(function(){
       tabSet(tab)
+      visibleChanger()
+
     })
   }
   type ItemProps = { title: string };
   const Item = ({ title }: ItemProps) => (
     <TouchableView style={{
       backgroundColor: colors.deepBlue,
+      flexDirection:'row',
+      width:'100%',
     }}
     onPress={useTabSet(title)}
     >
@@ -97,7 +115,19 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
       <Text style={{
         color: colors.urple,
         fontSize: 25,
+        marginRight:'auto'
       }}>{title}</Text>
+      {(currentTab==title)?(
+        <Text style = {{
+        color: colors.urple,
+        margin:5,
+        fontSize: 25
+      }}>{'>'}</Text>):(
+      <Text style = {{
+        margin:5,
+        color: colors.urple,
+        fontSize: 25
+      }}>{'^'}</Text>)}
     </TouchableView>
   );
   let DATA: Array<any>= [];
@@ -144,7 +174,7 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
   )
 }
 
-const newTask = (currentTab:string,something:any): ReactNode => {
+const newTask = (currentTab:string,something:any,visible:boolean): ReactNode => {
   function makeNote() {
     something({
       title:nttext,
@@ -153,7 +183,7 @@ const newTask = (currentTab:string,something:any): ReactNode => {
   }
   const [nttext,setText] = useState('New...')
   return (
-    <View
+    (visible?(    <View
       style={{
         backgroundColor: colors.deepBlue,
         borderRadius: 999,
@@ -188,10 +218,16 @@ const newTask = (currentTab:string,something:any): ReactNode => {
           <Path d="M 0.2 0.5 L 0.8 0.5 M 0.5 0.2 L 0.5 0.8" stroke={colors.urple} strokeWidth="0.1" fill="none" />
         </Svg>
       </TouchableView>
-    </View>
+    </View>):(<View/>))
+
   )
 }
-const TaSkroll = ({tasks}:{tasks:Array<Record<string,any>>}): ReactNode => {
+const TaSkroll = ({tasks,onTask}:{tasks:Array<Record<string,any>>,onTask:any}): ReactNode => {
+  function nonTask(taskName:string){
+    return(()=>{
+      onTask(taskName)
+    })
+  }
   return (
       <ScrollView
       style ={{
@@ -208,7 +244,7 @@ const TaSkroll = ({tasks}:{tasks:Array<Record<string,any>>}): ReactNode => {
           flexWrap: 'wrap',
           width: '100%',
         }}>
-          {TaskListFromTab(tasks)}
+          {TaskListFromTab(tasks,nonTask)}
         </View>
 
       </ScrollView>

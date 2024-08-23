@@ -8,6 +8,8 @@ else(Storage = new MMKV())
 
 let tabIterator:number = 0;
 let taskIterator:number = 0;
+
+
 function replacer(key:any, value:any) {
     if(value instanceof Map) {
       return {
@@ -26,6 +28,40 @@ function reviver(key:any, value:any) {
     }
     return value;
   }
+
+  const loadFrom = (key:string):string=>{
+    //console.log("loading : "+key)
+    if(typeof key !="string"){
+        throw new Error((typeof key)+" is invalid key type")
+    }
+    if(Platform.OS!='web'){
+        var res = Storage.getItem(key)
+        switch(res){
+            case null:
+                throw new Error("key: "+key+" is empty")
+            default:
+                return(res)
+        }
+    }else{
+        var res = Storage.getString(key)
+        switch(res){
+            case undefined:
+                throw new Error("key: "+key+" is empty")
+            default:
+                return(res)
+        }
+    }
+}
+const saveTo = (item:string,key:string)=>{
+    if(Platform.OS!='web'){
+        Storage.setItem(key,item)
+        return
+    }else{
+        Storage.set(key,item)
+        return
+    }
+    
+}
 
 /*
 all data
@@ -69,25 +105,6 @@ const iterate = (type:string):number|null=>{
             return(null)
     }
 }
-const loadFrom = (key:string):string=>{
-    if(Platform.OS!='web'){
-        var res = Storage.getItem(key)
-        switch(res){
-            case null:
-                throw new Error("key: "+key+" is empty")
-            default:
-                return(res)
-        }
-    }else{
-        var res = Storage.getString(key)
-        switch(res){
-            case undefined:
-                throw new Error("key: "+key+" is empty")
-            default:
-                return(res)
-        }
-    }
-}
 const initializeStorage = ()=>{
     clearStorage()
     let tabs: Map<string, string> = new Map<string, string>()
@@ -95,16 +112,7 @@ const initializeStorage = ()=>{
     createTab("Main Tab")
     
 }
-const saveTo = (item:string,key:string)=>{
-    if(Platform.OS!='web'){
-        Storage.setItem(key,item)
-        return
-    }else{
-        Storage.set(key,item)
-        return
-    }
-    
-}
+
 const saveItem = (key:string,item:any)=>{
     saveTo(JSON.stringify(item,replacer),key)
 }
@@ -142,7 +150,6 @@ const createTask = (tabname:string,task:Record<string,any>)=>{
     tab.push(taskindex)
     saveItem(taskindex,task)
     saveItem(tabindex,tab)
-    console.log("createdtask: ",task)
     return(taskindex)
 }
 const getTasks = (tabname:string):Array<Record<string,any>>=>{
@@ -159,6 +166,7 @@ const tests = ()=>{
     initializeStorage()
     console.log(loadItem("tabs"),"loaditem print")
     createTab("tab1")
+    createTab("tab2")
     let taskindex = createTask('tab1',
         {
             title:'dummyTitleTtile',
