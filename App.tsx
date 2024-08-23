@@ -24,10 +24,8 @@ export default function App() {
   }
   function editorToggle(tabName:string){
     if(typeof tabName !='string'){
-      console.log('undefinedToggle')
       seteditingMode(!editing)
     }else{
-      console.log('definedToggle',tabName)
       setCurrentTask(tabName)
       seteditingMode(!editing)
     }

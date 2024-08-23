@@ -106,7 +106,11 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
     const [time, changeTime] = useState(data.time)
     useEffect(
         ()=>{
-            console.log('ran useeffect')
+            gdata = loadItem(taskIndex)
+            if (!(gdata.content)) {
+                gdata.content = ""
+            }
+            console.log(taskIndex)
             changeData(gdata)
             changecontent(data.content)
             chagneTitle(data.title)
