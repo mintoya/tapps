@@ -12,7 +12,7 @@ import { effect, useSignal } from '@preact/signals-react';
 export default function App() {
   const [currentTab,setTab] = useState('tab1')
   const [allTasks,setalltasks] = useState<Record<string,any>[]>(()=>taskList(currentTab))
-  const [selectTabVisible,setSelectVisible] = useState(true)
+  const [selectTabVisible,setSelectVisible] = useState(false)
   const [editing,seteditingMode] = useState(false)
   const [currentTask,setCurrentTask]= useState<string>('task1')
   function addtask(task:Record<string,any>){
@@ -24,7 +24,7 @@ export default function App() {
   }
   function editorToggle(tabName:string){
     if(typeof tabName !='string'){
-      seteditingMode(!editing)
+      seteditingMode(false)
     }else{
       setCurrentTask(tabName)
       seteditingMode(!editing)

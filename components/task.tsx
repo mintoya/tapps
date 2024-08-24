@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useReducer, useState } from "react";
 import { Text, TextInput, View, StyleSheet } from "react-native";
 import { TouchableView } from "./touchableView";
 import colors from "../assets/colors";
-import { getTasks, createTab, loadItem } from "./storage";
+import { getTasks, createTab, loadItem,saveTask } from "./storage";
 import Markdown from "react-native-markdown-display";
 import Svg, { Path } from 'react-native-svg'
 
@@ -18,6 +18,10 @@ const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactN
     var hasColor: Boolean = false
     if (data.time) { hasTime = true }
     if (data.color) { hasColor = true }
+    function clickdebug(){
+        //console.log('clicked: ',data.adress)
+        onTask()
+    }
     return (
         <TouchableView
             style={{
@@ -29,7 +33,7 @@ const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactN
                 alignItems: 'center',
                 padding: 10,
             }}
-            onPress={onTask(data.adress)}
+            onPress={clickdebug}
         >
             <View
                 style={{ flexDirection: 'row' }}>
@@ -74,24 +78,17 @@ const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactN
 
 }
 const taskList = (tabName: string): Array<Record<string, any>> => {
-    var tasks = new Array<Record<string, any>>
-    try {
-        tasks = getTasks(tabName)
-    } catch (error) {
-        if (!(error instanceof Error)) {
-            throw error
-        }
-        if (error.message === 'tab doesnt exist') {
-            createTab(tabName)
-        }
-        tasks = getTasks(tabName)
-    }
+    var tasks = getTasks(tabName)
     return tasks
 }
 const TaskListFromTab = (tasklist: Record<string, any>[],onTask:any) => {
     var taskItems = new Array<ReactNode>
     for (let t of tasklist) {
-        taskItems.push(<Task key={t.adress} onTask={onTask} data={t} />)
+        if(t.adress==undefined){
+            console.error('task is malformed',t)
+        }else{
+        taskItems.push(<Task key={t.adress} onTask={onTask(t.adress)} data={t} />)
+        }
     }
     return taskItems
 }
@@ -100,24 +97,29 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
     if (!(gdata.content)) {
         gdata.content = ""
     }
-    const [data,changeData] = useState(gdata)
-    const [content, changecontent] = useState(data.content)
-    const [theTitle, chagneTitle] = useState(data.title)
-    const [time, changeTime] = useState(data.time)
+    const [content, changecontent] = useState(gdata.content)
+    const [theTitle, chagneTitle] = useState(gdata.title)
+    const [time, changeTime] = useState(gdata.time)
     useEffect(
         ()=>{
             gdata = loadItem(taskIndex)
             if (!(gdata.content)) {
                 gdata.content = ""
             }
-            console.log(taskIndex)
-            changeData(gdata)
-            changecontent(data.content)
-            chagneTitle(data.title)
-            changeTime(data.time)
+            changecontent(gdata.content)
+            chagneTitle(gdata.title)
+            changeTime(gdata.time)
         },[taskIndex]
     )
-    
+    //unfinished
+    const Save = ()=>{
+        //console.log('saving...',taskIndex)
+        saveTask(taskIndex,{content:content,title:theTitle,time:time})
+    }
+    function saveAndClose(){
+        toggleEdittor(taskIndex)
+        Save()
+    }
 
     let displayAsMarkDown = false
     let bstyle = StyleSheet.create({
@@ -146,7 +148,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
 
                 <TouchableView
                     style={{ ...bstyle.most, ...{backgroundColor:'black',width:'auto',marginLeft:'auto'} }}
-                    onPress={toggleEdittor}
+                    onPress={saveAndClose}
                 >
                     <Svg width="20" height="20" viewBox="0 0 1 1">
                         <Path d="M 0.375 0.25 Q 0.25 0.25 0.25 0.375 L 0.25 0.6 Q 0.25 0.75 0.375 0.75 L 0.56 0.75 Q 0.75 0.75 0.75 0.6 L 0.75 0.4 Q 0.757 0.25 0.627 0.25 L 0.375 0.25 M 0.35 0.44 Q 0.503 0.711 0.819 0.176" stroke={'white'} strokeWidth="0.1" fill="none" />

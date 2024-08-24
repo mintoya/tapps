@@ -75,7 +75,7 @@ tabs[] group of notes(map)
 
 const clearStorage = ()=>{
     if(Platform.OS!='web'){
-        console.error("securestore has no clear function")
+        console.warn("securestore has no clear function")
         clearSecureStore()
     }else{
         Storage.clearAll()
@@ -108,13 +108,16 @@ const iterate = (type:string):number|null=>{
 const initializeStorage = ()=>{
     clearStorage()
     let tabs: Map<string, string> = new Map<string, string>()
+    
     saveItem("tabs", tabs)
     createTab("Main Tab")
-    
 }
 
 const saveItem = (key:string,item:any)=>{
-    saveTo(JSON.stringify(item,replacer),key)
+    try{saveTo(JSON.stringify(item,replacer),key)}catch(e){
+        console.error(e,key)
+    }
+    
 }
 const loadItem = (key:string):any=>{
     return(JSON.parse(loadFrom(key),reviver))
@@ -152,10 +155,28 @@ const createTask = (tabname:string,task:Record<string,any>)=>{
     saveItem(tabindex,tab)
     return(taskindex)
 }
+const saveTask = (taskIndex:string,taskData:Record<string,any>)=>{
+    try{
+        loadItem(taskIndex)
+    }catch(e){
+        throw new Error('could not load item, key might be incorrect at saveTask?')
+    }
+    // console.log('previous task: ', loadItem(taskIndex))
+    // console.log('merging task:  ',taskData)
+    // console.log('result',{...loadItem(taskIndex), ...taskData})
+    let newtask = {
+        ...loadItem(taskIndex), ...taskData
+    }
+    saveItem(taskIndex,newtask)
+}
 const getTasks = (tabname:string):Array<Record<string,any>>=>{
     let notes:Array<Record<string,any>> = []
     let [noteindexes,tabindex] = getTab(tabname)
     for(let index of noteindexes){
+        let note = loadItem(index)
+        if(!note.adress){
+            console.warn('note without adress at :',index)
+        }
         notes.push(loadItem(index))
     }
     return(notes)
@@ -167,42 +188,42 @@ const tests = ()=>{
     console.log(loadItem("tabs"),"loaditem print")
     createTab("tab1")
     createTab("tab2")
-    let taskindex = createTask('tab1',
-        {
-            title:'dummyTitleTtile',
-            color:'#f0f',
-            time:"00:00",
-        }
-    )
-    createTask('tab1',
-        {
-            title:'dummyTitle',
-            time:"00:00",
-        }
-    )
-    createTask('tab1',
-        {
-            title:'test',
-            time:"00:00",
-        }
-    )
-    createTask('tab1',
-        {
-            title:'test',
-            time:"00:00",
-            color:'#ff0'
-        }
-    )
-    createTask('tab1',
-        {
-            title:'test',
-            time:"00:00",
-        }
-    )
+    // let taskindex = createTask('tab1',
+    //     {
+    //         title:'dummyTitleTtile',
+    //         color:'#f0f',
+    //         time:"00:00",
+    //     }
+    // )
+    // createTask('tab1',
+    //     {
+    //         title:'dummyTitle',
+    //         time:"00:00",
+    //     }
+    // )
+    // createTask('tab1',
+    //     {
+    //         title:'test',
+    //         time:"00:00",
+    //     }
+    // )
+    // createTask('tab1',
+    //     {
+    //         title:'test',
+    //         time:"00:00",
+    //         color:'#ff0'
+    //     }
+    // )
+    // createTask('tab1',
+    //     {
+    //         title:'test',
+    //         time:"00:00",
+    //     }
+    // )
 }
 //initializeStorage()
 tests()
 
 
 
-export {tests,createTab,getTab,getTabs,getTasks,createTask,initializeStorage,loadItem}
+export {tests,createTab,getTab,getTabs,getTasks,createTask,initializeStorage,saveTask,loadItem}
