@@ -14,7 +14,7 @@ export default function App() {
   const [allTasks,setalltasks] = useState<Record<string,any>[]>(()=>taskList(currentTab))
   const [selectTabVisible,setSelectVisible] = useState(false)
   const [editing,seteditingMode] = useState(false)
-  const [currentTask,setCurrentTask]= useState<string>('task1')
+  const [currentTask,setCurrentTask]= useState<string>('000')
   function addtask(task:Record<string,any>){
     createTask(currentTab,task)
     setalltasks(taskList(currentTab))

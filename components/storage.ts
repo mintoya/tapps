@@ -120,7 +120,7 @@ const saveItem = (key:string,item:any)=>{
     
 }
 const loadItem = (key:string):any=>{
-    return(JSON.parse(loadFrom(key),reviver))
+    try{return(JSON.parse(loadFrom(key),reviver))}catch(e){console.log(e,key);throw e}
 }
 const getTabs = ():Map<string,string>=>{
     let tabs = loadItem("tabs")
