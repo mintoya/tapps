@@ -16,6 +16,7 @@
     "expo-status-bar": "~1.12.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
     "react-native": "^0.73.9",
     "react-native-markdown-display": "^7.0.2",
     "react-native-mmkv": "^2.12.2",

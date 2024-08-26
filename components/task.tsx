@@ -4,6 +4,8 @@ import { TouchableView } from "./touchableView";
 import colors from "../assets/colors";
 import { getTasks, createTab, loadItem,saveTask } from "./storage";
 import Markdown from "react-native-markdown-display";
+// markdown-it later?
+//import Markdown from 'react-markdown'
 import Svg, { Path } from 'react-native-svg'
 
 /*
@@ -120,7 +122,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
             changecontent(gdata.content)
             chagneTitle(gdata.title)
             changeTime(gdata.time)
-        },[taskIndex,visible,displayAsMarkDown]
+        },[taskIndex,visible]
     )
     function mddisplay(){
         setMdDisplay(!displayAsMarkDown)
