@@ -20,9 +20,20 @@
     "preview3": {
       "developmentClient": true
     },
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "image": "latest"
+      },
+      "ios": {
+        "image": "latest"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {},
+      "ios": {}
+    }
   }
 }
