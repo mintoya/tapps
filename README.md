@@ -7,6 +7,7 @@
  - add checkboxes?
  
  [ ] tasks
+   
     - ~~title~~
     - ~~color~~
     - time
@@ -15,6 +16,7 @@
     - ~~deleting~~
 
  [X] tabs
+
     - ~~changing tabs~~
     - ~~adding tabs~~
     - ~~removing tabs~~
