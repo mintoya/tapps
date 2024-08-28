@@ -5,6 +5,7 @@
  [x] support MarkDown
  - ~~markdown~~
  - add checkboxes?
+ 
  [ ] tasks
     - ~~title~~
     - ~~color~~
@@ -12,6 +13,7 @@
     - ~~content~~
     - ~~saving~~
     - ~~deleting~~
+
  [X] tabs
     - ~~changing tabs~~
     - ~~adding tabs~~
