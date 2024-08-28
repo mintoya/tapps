@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
+    "cross-local-storage": "github:apperside/cross-local-storage",
     "expo": "~51.0.31",
     "expo-build-properties": "^0.12.5",
     "expo-secure-store": "^13.0.2",
@@ -20,6 +21,7 @@
     "react-native": "^0.74.5",
     "react-native-markdown-display": "^7.0.2",
     "react-native-mmkv": "^2.12.2",
+    "react-native-storage": "^1.0.1",
     "react-native-svg": "15.2.0",
     "react-native-web": "~0.19.10"
   },

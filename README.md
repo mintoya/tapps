@@ -1,14 +1,18 @@
 # A React ToDo app
     nothing sepcial
     my first React app
-## todo lol
- [ ] support MarkDown
+## todo
+ [x] support MarkDown
  - ~~markdown~~
- - add checkboxes
-
- [x] saving
-
- [ ] tabs
-- ~~changing tabs~~
-- adding tabs
-- removing tabs
+ - add checkboxes?
+ [ ] tasks
+    - ~~title~~
+    - ~~color~~
+    - time
+    - ~~content~~
+    - ~~saving~~
+    - ~~deleting~~
+ [X] tabs
+    - ~~changing tabs~~
+    - ~~adding tabs~~
+    - ~~removing tabs~~

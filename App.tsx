@@ -1,16 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
-import { JSX, JSXElementConstructor, ReactElement, ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { TouchableView } from './components/touchableView';
 import colors from './assets/colors';
 import Svg, { Path } from 'react-native-svg'
-import {TaskListFromTab,Task, taskList, taskEditor} from './components/task';
-import { createTask, tests,loadItem, getTabs } from './components/storage';
-import { effect, useSignal } from '@preact/signals-react';
+import {TaskListFromTab, taskList, taskEditor} from './components/task';
+import { createTask, getTabs, createTab,removeTab } from './components/storage';
 
 
 export default function App() {
-  const [currentTab,setTab] = useState('tab1')
+  const [currentTab,setTab] = useState('Main Tab')
   const [allTasks,setalltasks] = useState<Record<string,any>[]>(()=>taskList(currentTab))
   const [selectTabVisible,setSelectVisible] = useState(false)
   const [editing,seteditingMode] = useState(false)
@@ -52,7 +51,7 @@ export default function App() {
           flex: 1
         }}
       >
-        {taskEditor(currentTask,editorToggle,editing)}
+        {taskEditor(currentTask,editorToggle,editing,currentTab)}
         <TaSkroll tasks={allTasks} onTask = {editorToggle} />
         <View id="padding" style={{ flex: 1 }}></View>
         {newTask(currentTab,addtask,!editing)}
@@ -100,6 +99,20 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
 
     })
   }
+  function createtab(title:string){
+    return(()=>{
+      createTab(title)
+      useTabSet(title)()
+    })
+  }
+  function deletetab(title:string){
+    return(()=>{
+      if(!(title=="Main Tab")){
+      removeTab(title)
+      useTabSet(getTabs().entries().next().value[0])()
+      }
+    })
+  }
   type ItemProps = { title: string };
   const Item = ({ title }: ItemProps) => (
     <TouchableView style={{
@@ -115,6 +128,8 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
         fontSize: 25,
         marginRight:'auto'
       }}>{title}</Text>
+      <TouchableView onPress={deletetab(title)}
+      ><Text style = {{color: colors.urple,margin:5,fontSize: 25}}>{'x'}</Text></TouchableView>
       {(currentTab==title)?(
         <Text style = {{
         color: colors.urple,
@@ -128,6 +143,35 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
       }}>{'^'}</Text>)}
     </TouchableView>
   );
+  const [newTabtitle,setNewTabTitle] = useState<string>('new Tab...')
+  const Foot = ()=>(
+      <TouchableView style={{
+        backgroundColor: colors.deepBlue,
+        flexDirection:'row',
+        width:'100%',
+      }}
+      onPress={createtab(newTabtitle)}
+      >
+        
+        <TextInput style={{
+          flex:1,
+          height:'100%',
+          borderColor:colors.urple,
+          borderWidth:2,
+          borderRadius:5,
+          paddingHorizontal:10,
+          color: colors.urple,
+          fontSize: 25,
+          marginRight:'auto'
+        }}
+        value={newTabtitle}
+        onChangeText={setNewTabTitle}/>
+          <Text style = {{
+          color: colors.urple,
+          margin:5,
+          fontSize: 25
+        }}>{'+'}</Text>
+      </TouchableView>)
   let DATA: Array<any>= [];
   getTabs().forEach(
     (tabindex:string,tab:string)=>{
@@ -164,6 +208,7 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
           data={DATA}
           renderItem={({ item }) => <Item title={item.title} />}
           keyExtractor={item => item.id}
+          ListFooterComponent={Foot()}
         />
       </TouchableView>
       </Pressable>
@@ -171,7 +216,6 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
     </Modal>
   )
 }
-
 const newTask = (currentTab:string,something:any,visible:boolean): ReactNode => {
   function makeNote() {
     something({

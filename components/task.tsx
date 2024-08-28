@@ -1,8 +1,8 @@
-import { ReactNode, useEffect, useReducer, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
 import { TouchableView } from "./touchableView";
 import colors from "../assets/colors";
-import { getTasks, createTab, loadItem,saveTask } from "./storage";
+import { getTasks, loadItem,saveTask,removeTask } from "./storage";
 import Markdown from "react-native-markdown-display";
 // markdown-it later?
 //import Markdown from 'react-markdown'
@@ -14,6 +14,7 @@ structure
     title
     color?
     time?
+    content?
 */
 const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactNode => {
     var hasTime: Boolean = false
@@ -94,18 +95,68 @@ const TaskListFromTab = (tasklist: Record<string, any>[],onTask:any) => {
     }
     return taskItems
 }
-const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): ReactNode => {
+const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,currentTab:string): ReactNode => {
+
+    function color(data:Record<string,any>):ReactNode{
+        const ColoredButton = (currentcolor:string,color: string, onpress: any): ReactNode => {
+            let bstyle = {
+              backgroundColor: color,
+              width: 20,
+              aspectRatio: 1,
+              margin: 2,
+              borderColor:colors.urple,
+              borderRadius: 5000,
+            };
+            if(currentcolor==color){
+                bstyle = {...bstyle,...{borderWidth:5}}
+
+            }
+            return (
+              <TouchableView style={bstyle} onPress={onpress}>
+                <View />
+              </TouchableView>
+            );
+          };
+          function setColorTo(color?:string){
+            if(!color){color = '#fff'}
+            return(function(){changeSelfCololr(color)})
+          }
+        return(
+            <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            {ColoredButton(selfColor,'#ffec99',setColorTo('#ffec99'))}
+            {ColoredButton(selfColor,'#ffd43b',setColorTo('#ffd43b'))}
+            {ColoredButton(selfColor,'#fab005',setColorTo('#fab005'))}
+            {ColoredButton(selfColor,'#f08c00',setColorTo('#f08c00'))}
+            {ColoredButton(selfColor,'#e8590c',setColorTo('#e8590c'))}
+          </View>
+        )
+    }
+
+    
     let gdata: Record<string,any>
+    
     if(taskIndex=='000'){
         gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
     }else{
-        gdata =  loadItem(taskIndex)
+        
+        try{
+            gdata =  loadItem(taskIndex)
+        }catch(e){
+            gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
+        }
     }
     
     if (!(gdata.content)) {
-        gdata.content = ""
+        gdata.content = "";
+    }
+    if (!(gdata.color)) {
+        gdata.color = "#ffec99";
     }
     const [content, changecontent] = useState(gdata.content)
+    const [selfColor, changeSelfCololr] = useState(gdata.color)
     const [theTitle, chagneTitle] = useState(gdata.title)
     const [time, changeTime] = useState(gdata.time)
     const [displayAsMarkDown,setMdDisplay] = useState(false)
@@ -114,11 +165,17 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
             if(taskIndex=='000'){
                 gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
             }else{
-                gdata =  loadItem(taskIndex)
+                try{
+                    gdata =  loadItem(taskIndex)
+                }catch(e){
+                    gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
+                }
+                
             }
             if (!(gdata.content)) {
                 gdata.content = ""
             }
+            changeSelfCololr(gdata.color)
             changecontent(gdata.content)
             chagneTitle(gdata.title)
             changeTime(gdata.time)
@@ -129,12 +186,19 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
     }
     //unfinished
     const Save = ()=>{
-            saveTask(taskIndex,{content:content,title:theTitle,time:time})
-        //console.log('saving...',taskIndex)
+        saveTask(taskIndex,{content:content,title:theTitle,time:time,color:selfColor})
     }
+    const Delete = async()=>{
+        await removeTask(currentTab,taskIndex)
+    //console.log('saving...',taskIndex)
+}
     function saveAndClose(){
         toggleEdittor(taskIndex)
         Save()
+    }
+    async function deleteAndClose(){
+        toggleEdittor(taskIndex)
+        await Delete()
     }
 
     
@@ -158,7 +222,9 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
                 value={theTitle}
                 onChangeText={chagneTitle}
             />
-            <View key={'colorBox'} style={bstyle.most}></View>
+            <View key={'colorBox'} style={{...bstyle.most,...{width:'auto',marginRight:'auto'}}}>
+                {color(gdata)}
+            </View>
             <Text key={'timeBox'} style={bstyle.most}>{time}</Text>
             <View key={'toggle+save'} style = {{height:'auto',flexDirection:'row'}}>
             <TouchableView
@@ -171,10 +237,19 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean): Reac
                 </TouchableView>
                 <TouchableView
                     style={{ ...bstyle.most, ...{width:'auto',marginLeft:'auto'} }}
+                    onPress={deleteAndClose}
+                >
+                    <Svg width="20" height="20" viewBox=".2 .15 .6 .5">
+
+                        <Path d="M 0.368 0.203 L 0.619 0.202 M 0.261 0.281 L 0.739 0.28 M 0.35 0.348 L 0.4 0.6 M 0.5 0.35 L 0.5 0.6 M 0.65 0.349 L 0.6 0.6" stroke={'white'} strokeWidth="0.1" fill="none" />
+                    </Svg>
+                </TouchableView>
+                <TouchableView
+                    style={{ ...bstyle.most, ...{width:'auto',marginLeft:'auto'} }}
                     onPress={saveAndClose}
                 >
-                    <Svg width="20" height="20" viewBox="0 0 1 1">
-                        <Path d="M 0.375 0.25 Q 0.25 0.25 0.25 0.375 L 0.25 0.6 Q 0.25 0.75 0.375 0.75 L 0.56 0.75 Q 0.75 0.75 0.75 0.6 L 0.75 0.4 Q 0.757 0.25 0.627 0.25 L 0.375 0.25 M 0.35 0.44 Q 0.503 0.711 0.819 0.176" stroke={'white'} strokeWidth="0.1" fill="none" />
+                    <Svg width="20" height="20" viewBox=".2 .1 .75 .7">
+                        <Path d="M 0.375 0.25 Q 0.25 0.25 0.25 0.375 L 0.25 0.6 Q 0.25 0.75 0.375 0.75 L 0.56 0.75 Q 0.75 0.75 0.75 0.6 L 0.75 0.4 Q 0.757 0.25 0.627 0.25 L 0.375 0.25 M 0.35 0.44 L 0.485 0.564 L 0.903 0.159" stroke={'white'} strokeWidth="0.1" fill="none" />
                     </Svg>
                 </TouchableView>
             </View>
