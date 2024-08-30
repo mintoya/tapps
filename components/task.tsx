@@ -30,7 +30,7 @@ const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactN
             style={{
                 backgroundColor: colors.liteBlue,
                 flexGrow: 1,
-                borderRadius: 10,
+                borderRadius: 20,
                 flexDirection: 'column',
                 margin: 20,
                 alignItems: 'center',

@@ -175,9 +175,11 @@ const modalTabs = (currentTab:string,tabSet:any,visible:boolean,visibleChanger:a
   let DATA: Array<any>= [];
   getTabs().forEach(
     (tabindex:string,tab:string)=>{
+      var selfidnex = Math.random()*100 
+      console.log(tabindex+(selfidnex))
       DATA.push({
         title:tab,
-        id:tabindex
+        id:tabindex+selfidnex
       })
     }
   )

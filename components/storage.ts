@@ -83,6 +83,7 @@ function reviver(key: any, value: any) {
 
 const saveItem = (key: string, item: any) => {
     saveTo(JSON.stringify(item, replacer), key)
+    console.log(`Saved item to ${key}`);
 
 }
 const loadItem = (key: string): any => {
@@ -198,6 +199,7 @@ const createTask = (tabname: string, task: Record<string, any>) => {
     tab.push(taskindex)
     saveItem(taskindex, task)
     saveItem(tabindex, tab)
+    console.log(`created task ${taskindex} at ${tabname}`)
     return (taskindex)
 }
 const saveTask = (taskIndex: string, taskData: Record<string, any>) => {
@@ -216,6 +218,7 @@ const saveTask = (taskIndex: string, taskData: Record<string, any>) => {
     saveItem(taskIndex, newtask)
 }
 const getTasks = (tabname: string): Array<Record<string, any>> => {
+    console.log(`getting tasks from ${tabname}`)
     let notes: Array<Record<string, any>> = []
     let [noteindexes, tabindex] = getTab(tabname)
     console.log(noteindexes)
@@ -268,8 +271,8 @@ const tests = () => {
         }
     )
 }
-initializeStorage()
-// tests()
+// initializeStorage()
+tests()
 
 
 
