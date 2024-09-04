@@ -7,6 +7,7 @@ import Markdown from "react-native-markdown-display";
 // markdown-it later?
 //import Markdown from 'react-markdown'
 import Svg, { Path } from 'react-native-svg'
+import DatePicker from "./datePickeer";
 
 /*
 structure
@@ -225,7 +226,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
             <View key={'colorBox'} style={{...bstyle.most,...{width:'auto',marginRight:'auto'}}}>
                 {color(gdata)}
             </View>
-            <Text key={'timeBox'} style={bstyle.most}>{time}</Text>
+            <DatePicker currentDate={time} setDate={changeTime} />
             <View key={'toggle+save'} style = {{height:'auto',flexDirection:'row'}}>
             <TouchableView
                     style={{ ...bstyle.most, ...{width:'auto',marginLeft:5} }}
