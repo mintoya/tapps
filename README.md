@@ -6,10 +6,10 @@
  - ~~markdown~~
  - add checkboxes?
  
- [ ] tasks
+ [x] tasks
 - ~~title~~
 - ~~color~~
-- time
+- ~~time~~
 - ~~content~~
 - ~~saving~~
 - ~~deleting~~
