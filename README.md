@@ -7,14 +7,14 @@
  - add checkboxes?
  
  [ ] tasks
-    - ~~title~~
-    - ~~color~~
-    - time
-    - ~~content~~
-    - ~~saving~~
-    - ~~deleting~~
+- ~~title~~
+- ~~color~~
+- time
+- ~~content~~
+- ~~saving~~
+- ~~deleting~~
 
  [X] tabs
-    - ~~changing tabs~~
-    - ~~adding tabs~~
-    - ~~removing tabs~~
+- ~~changing tabs~~
+- ~~adding tabs~~
+- ~~removing tabs~~
