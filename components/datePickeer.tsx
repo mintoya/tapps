@@ -13,6 +13,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import colors from '../assets/colors';
 
 // export default function App() {
 //   const [currentDate, setCurrentDate] = useState<
@@ -46,13 +47,14 @@ export default function DatePicker({
     ['November', 30],
     ['December', 31],
   ]);
-  if (currentDate==undefined){
+  if(currentDate==undefined||currentDate.day==undefined){
     currentDate = {
-        day: 1,
-        month: 'January',
-        year: 2024,
-      }
+          day: 1,
+          month: 'January',
+          year: 2024,
+      };
   }
+  console.log(currentDate+' is currentDate')
   let dChoiceArray: Array<number> = [];
   const [dChoice, setDChoice] = useState<number>(currentDate.day);
   let mChoiceArray: Array<string> = [];
@@ -135,7 +137,7 @@ const Picker = ({
       style={{
         width: '100%',
         minWidth: 35,
-        backgroundColor: '#b58df1',
+        backgroundColor:colors.liteBlue,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 10,
@@ -144,7 +146,7 @@ const Picker = ({
         flip();
         setChoice(title);
       }}>
-      <Text style={{ fontSize: 18 }}>{title}</Text>
+      <Text style={{ fontSize: 18,color:'white' }}>{title}</Text>
     </Pressable>
   );
 
@@ -162,7 +164,7 @@ const Picker = ({
             overflow: 'hidden',
             width: 'auto',
             padding: 5,
-            backgroundColor: '#b58df1',
+            backgroundColor: colors.liteBlue,
             borderRadius: 10,
           },
           animatedStyles,
@@ -170,24 +172,24 @@ const Picker = ({
         {focused ? (
           
           <FlatList
-            style={{ width: '100%', alignItems: 'center', padding: 'auto' }}
+            style={{ width: '100%',  padding: 'auto' }}
             data={DATA}
             renderItem={({ item }) => <Item title={item} />}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item+Math.random()}
           />
         ) : (
           <Pressable
             style={{
               height: '100%',
               width: '100%',
-              backgroundColor: '#b58df1',
+              backgroundColor: colors.liteBlue,
               alignItems: 'center',
               justifyContent: 'center',
             }}
             onPress={() => {
               flip();
             }}>
-            <Text style={{ fontSize: 24 }}>{currentChoice}</Text>
+            <Text style={{ fontSize: 24,color:'white' }}>{currentChoice}</Text>
           </Pressable>
         )}
       </Animated.View>
@@ -227,7 +229,7 @@ const YPicker = ({
       style={{
         width: '100%',
         minWidth: 35,
-        backgroundColor: '#b58df1',
+        backgroundColor: colors.liteBlue,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 10,
@@ -236,7 +238,7 @@ const YPicker = ({
         flip();
         setChoice(title);
       }}>
-      <Text style={{ fontSize: 18 }}>{title}</Text>
+      <Text style={{ fontSize: 18,color:'white' }}>{title}</Text>
     </Pressable>
   );
 
@@ -254,7 +256,7 @@ const YPicker = ({
             overflow: 'hidden',
             width: 'auto',
             padding: 5,
-            backgroundColor: '#b58df1',
+            backgroundColor: colors.liteBlue,
             borderRadius: 10,
           },
           animatedStyles,
@@ -262,7 +264,7 @@ const YPicker = ({
         {focused ? (
           
           <FlatList
-            style={{ width: '100%', alignItems: 'center', padding: 'auto' }}
+            style={{ width: '100%', padding: 'auto' }}
             data={DATA}
             renderItem={({ item }) => <Item title={item+""} />}
             keyExtractor={(item) => item+Math.random()+""}
@@ -273,14 +275,14 @@ const YPicker = ({
             style={{
               height: '100%',
               width: '100%',
-              backgroundColor: '#b58df1',
+              backgroundColor: colors.liteBlue,
               alignItems: 'center',
               justifyContent: 'center',
             }}
             onPress={() => {
               flip();
             }}>
-            <Text style={{ fontSize: 24 }}>{currentChoice}</Text>
+            <Text style={{ fontSize: 24,color:'white' }}>{currentChoice}</Text>
           </Pressable>
         )}
       </Animated.View>

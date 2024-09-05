@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
 import { TouchableView } from "./touchableView";
 import colors from "../assets/colors";
-import { getTasks, loadItem,saveTask,removeTask } from "./storage";
+import { getTasks, loadItem, saveTask, removeTask } from "./storage";
 import Markdown from "react-native-markdown-display";
 // markdown-it later?
 //import Markdown from 'react-markdown'
@@ -17,12 +17,12 @@ structure
     time?
     content?
 */
-const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactNode => {
+const Task = ({ data, onTask }: { data: Record<string, any>, onTask: any }): ReactNode => {
     var hasTime: Boolean = false
     var hasColor: Boolean = false
     if (data.time) { hasTime = true }
     if (data.color) { hasColor = true }
-    function clickdebug(){
+    function clickdebug() {
         //console.log('clicked: ',data.adress)
         onTask()
     }
@@ -72,7 +72,7 @@ const Task = ({ data,onTask }: { data: Record<string, any>,onTask:any }): ReactN
                         color: 'white',
                         fontSize: 8,
                         marginHorizontal: 5,
-                    }}>{data.time}</Text>
+                    }}>{data.time.month+','+data.time.day+','+data.time.year}</Text>
             ) : (
                 <View></View>
             )
@@ -85,124 +85,143 @@ const taskList = (tabName: string): Array<Record<string, any>> => {
     var tasks = getTasks(tabName)
     return tasks
 }
-const TaskListFromTab = (tasklist: Record<string, any>[],onTask:any) => {
+const TaskListFromTab = (tasklist: Record<string, any>[], onTask: any) => {
     var taskItems = new Array<ReactNode>
     for (let t of tasklist) {
-        if(t.adress==undefined){
-            console.error('task is malformed',t)
-        }else{
-        taskItems.push(<Task key={t.adress} onTask={onTask(t.adress)} data={t} />)
+        if (t.adress == undefined) {
+            console.error('task is malformed', t)
+        } else {
+            taskItems.push(<Task key={t.adress+Math.random()} onTask={onTask(t.adress)} data={t} />)
         }
     }
     return taskItems
 }
-const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,currentTab:string): ReactNode => {
+const taskEditor = (taskIndex: string, toggleEdittor: any, visible: boolean, currentTab: string): ReactNode => {
 
-    function color(data:Record<string,any>):ReactNode{
-        const ColoredButton = (currentcolor:string,color: string, onpress: any): ReactNode => {
+    function color(data: Record<string, any>): ReactNode {
+        const ColoredButton = (currentcolor: string, color: string, onpress: any): ReactNode => {
             let bstyle = {
-              backgroundColor: color,
-              width: 20,
-              aspectRatio: 1,
-              margin: 2,
-              borderColor:colors.urple,
-              borderRadius: 5000,
+                backgroundColor: color,
+                width: 20,
+                aspectRatio: 1,
+                margin: 2,
+                borderColor: colors.urple,
+                borderRadius: 5000,
             };
-            if(currentcolor==color){
-                bstyle = {...bstyle,...{borderWidth:5}}
+            if (currentcolor == color) {
+                bstyle = { ...bstyle, ...{ borderWidth: 5 } }
 
             }
             return (
-              <TouchableView style={bstyle} onPress={onpress}>
-                <View />
-              </TouchableView>
+                <TouchableView style={bstyle} onPress={onpress}>
+                    <View />
+                </TouchableView>
             );
-          };
-          function setColorTo(color?:string){
-            if(!color){color = '#fff'}
-            return(function(){changeSelfCololr(color)})
-          }
-        return(
+        };
+        function setColorTo(color?: string) {
+            if (!color) { color = '#fff' }
+            return (function () { changeSelfCololr(color) })
+        }
+        return (
             <View
-            style={{
-              flexDirection: 'row',
-            }}>
-            {ColoredButton(selfColor,'#ffec99',setColorTo('#ffec99'))}
-            {ColoredButton(selfColor,'#ffd43b',setColorTo('#ffd43b'))}
-            {ColoredButton(selfColor,'#fab005',setColorTo('#fab005'))}
-            {ColoredButton(selfColor,'#f08c00',setColorTo('#f08c00'))}
-            {ColoredButton(selfColor,'#e8590c',setColorTo('#e8590c'))}
-          </View>
+                style={{
+                    flexDirection: 'row',
+                }}>
+                {ColoredButton(selfColor, '#ffec99', setColorTo('#ffec99'))}
+                {ColoredButton(selfColor, '#ffd43b', setColorTo('#ffd43b'))}
+                {ColoredButton(selfColor, '#fab005', setColorTo('#fab005'))}
+                {ColoredButton(selfColor, '#f08c00', setColorTo('#f08c00'))}
+                {ColoredButton(selfColor, '#e8590c', setColorTo('#e8590c'))}
+            </View>
         )
     }
 
-    
-    let gdata: Record<string,any>
-    
-    if(taskIndex=='000'){
-        gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
-    }else{
-        
-        try{
-            gdata =  loadItem(taskIndex)
-        }catch(e){
-            gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
+
+    let gdata: Record<string, any>
+
+    if (taskIndex == '000') {
+        gdata = { title: 'dummyTitleTtile', color: '#f0f', time: "00:00", }
+    } else {
+
+        try {
+            gdata = loadItem(taskIndex)
+        } catch (e) {
+            gdata = { title: 'dummyTitleTtile', color: '#f0f', time: "00:00", }
         }
     }
-    
+
     if (!(gdata.content)) {
         gdata.content = "";
     }
     if (!(gdata.color)) {
         gdata.color = "#ffec99";
     }
+    if (!gdata.time) {
+        gdata.time = {
+            day: 1,
+            month: 'January',
+            year: 2024,
+        };
+
+    }
     const [content, changecontent] = useState(gdata.content)
     const [selfColor, changeSelfCololr] = useState(gdata.color)
     const [theTitle, chagneTitle] = useState(gdata.title)
     const [time, changeTime] = useState(gdata.time)
-    const [displayAsMarkDown,setMdDisplay] = useState(false)
+    const [displayAsMarkDown, setMdDisplay] = useState(false)
     useEffect(
-        ()=>{
-            if(taskIndex=='000'){
-                gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
-            }else{
-                try{
-                    gdata =  loadItem(taskIndex)
-                }catch(e){
-                    gdata ={title:'dummyTitleTtile',color:'#f0f',time:"00:00",}
+        () => {
+            if (taskIndex == '000') {
+                gdata = { title: 'dummyTitleTtile', color: '#f0f', time: "00:00", }
+            } else {
+                try {
+                    gdata = loadItem(taskIndex)
+                } catch (e) {
+                    gdata = { title: 'dummyTitleTtile', color: '#f0f', time: "00:00", }
                 }
-                
+
+            }
+            if (!(gdata.content)) {
+                gdata.content = "";
             }
             if (!(gdata.content)) {
                 gdata.content = ""
+            }
+            if (!gdata.time) {
+                gdata.time = {
+                    day: 1,
+                    month: 'January',
+                    year: 2024,
+                };
+        
             }
             changeSelfCololr(gdata.color)
             changecontent(gdata.content)
             chagneTitle(gdata.title)
             changeTime(gdata.time)
-        },[taskIndex,visible]
+        }, [taskIndex, visible]
     )
-    function mddisplay(){
+    function mddisplay() {
         setMdDisplay(!displayAsMarkDown)
     }
     //unfinished
-    const Save = ()=>{
-        saveTask(taskIndex,{content:content,title:theTitle,time:time,color:selfColor})
+    const Save = () => {
+        saveTask(taskIndex, { content: content, title: theTitle, time: time, color: selfColor })
     }
-    const Delete = async()=>{
-        await removeTask(currentTab,taskIndex)
-    //console.log('saving...',taskIndex)
-}
-    function saveAndClose(){
+    const Delete = async () => {
+        await removeTask(currentTab, taskIndex)
+        //console.log('saving...',taskIndex)
+    }
+    function saveAndClose() {
         toggleEdittor(taskIndex)
         Save()
     }
-    async function deleteAndClose(){
+    async function deleteAndClose() {
         toggleEdittor(taskIndex)
         await Delete()
     }
 
-    
+
     let bstyle = StyleSheet.create({
         most: {
             borderRadius: 20,
@@ -213,7 +232,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
         }
     })
     return (
-        (visible?( <View style={{ backgroundColor: colors.trasnparent, width: '100%', height: '100%', flexDirection: 'column' }}>
+        (visible ? (<View style={{ backgroundColor: colors.trasnparent, width: '100%', height: '100%', flexDirection: 'column' }}>
             <TextInput key={'titleBox'} style={{
                 ...bstyle.most, ...{
                     width: '50%',
@@ -223,13 +242,13 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
                 value={theTitle}
                 onChangeText={chagneTitle}
             />
-            <View key={'colorBox'} style={{...bstyle.most,...{width:'auto',marginRight:'auto'}}}>
+            <View key={'colorBox'} style={{ ...bstyle.most, ...{ width: 'auto', marginRight: 'auto' } }}>
                 {color(gdata)}
             </View>
             <DatePicker currentDate={time} setDate={changeTime} />
-            <View key={'toggle+save'} style = {{height:'auto',flexDirection:'row'}}>
-            <TouchableView
-                    style={{ ...bstyle.most, ...{width:'auto',marginLeft:5} }}
+            <View key={'toggle+save'} style={{ height: 'auto', flexDirection: 'row' }}>
+                <TouchableView
+                    style={{ ...bstyle.most, ...{ width: 'auto', marginLeft: 5 } }}
                     onPress={mddisplay}
                 >
                     <Svg width="40" height="20" viewBox=".04 .27 .74 .41">
@@ -237,7 +256,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
                     </Svg>
                 </TouchableView>
                 <TouchableView
-                    style={{ ...bstyle.most, ...{width:'auto',marginLeft:'auto'} }}
+                    style={{ ...bstyle.most, ...{marginHorizontal:0,marginVertical:'auto', width: 'auto', marginLeft: 'auto',} }}
                     onPress={deleteAndClose}
                 >
                     <Svg width="20" height="20" viewBox=".2 .15 .6 .5">
@@ -246,7 +265,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
                     </Svg>
                 </TouchableView>
                 <TouchableView
-                    style={{ ...bstyle.most, ...{width:'auto',marginLeft:'auto'} }}
+                    style={{ ...bstyle.most, ...{ width: 'auto', marginLeft: 20 } }}
                     onPress={saveAndClose}
                 >
                     <Svg width="20" height="20" viewBox=".2 .1 .75 .7">
@@ -262,7 +281,7 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
             }}>
                 {displayAsMarkDown ? (
                     <ScrollView><Markdown>{content}</Markdown></ScrollView>
-                    
+
                 ) : (
                     <TextInput
                         style={{ height: 'auto', flex: 1, }}
@@ -273,8 +292,8 @@ const taskEditor = (taskIndex: string, toggleEdittor: any,visible:boolean,curren
             </View>
 
 
-        </View>):(<View/>))
-       
+        </View>) : (<View />))
+
     )
 }
 export { Task, TaskListFromTab, taskList, taskEditor }

@@ -1,13 +1,40 @@
 import { MMKV } from 'react-native-mmkv'
 import { Platform } from 'react-native';
 import * as secureStorage from 'expo-secure-store';
+import { KeyboardState } from 'react-native-reanimated';
 let Storage: any;
 
 if (Platform.OS != "web") { Storage = secureStorage }
-else{Storage = new MMKV()}
+else { Storage = new MMKV() }
 
 let tabIterator: number = 0;
 let taskIterator: number = 0;
+
+
+const loadItem = (key: string): any => {
+    try { return (JSON.parse(loadFrom(key), reviver)) } catch (e) { return false }
+}
+
+
+
+const KeyLoader = {
+    everyKey: new Array<string>,
+    saveSelf:function(){
+        console.log(loadItem("everyKey"),"current keys (saving)")
+        const key ="everyKey"
+        if (Platform.OS != 'web') {
+            Storage.setItem(key, JSON.stringify(this.everyKey, replacer), key)
+            return
+        } else {
+            Storage.set(key, JSON.stringify(this.everyKey, replacer), key)
+            return
+        }
+    },
+    removeKey: function (Key: string) { this.everyKey.filter((key: string) => { key == Key });this.saveSelf() },
+    addKey: function (Key: string) { this.removeKey(Key); this.everyKey.push(Key); this.saveSelf() }
+}
+console.log(loadItem("everyKey"),"current keys")
+if (!loadItem("everyKey")) { KeyLoader.everyKey = new Array<string> } else { KeyLoader.everyKey = loadItem("everyKey") }
 
 const loadFrom = (key: string): string => {
     //console.log("loading : "+key)
@@ -33,6 +60,7 @@ const loadFrom = (key: string): string => {
     }
 }
 const saveTo = (item: string, key: string) => {
+    KeyLoader.addKey(key)
     if (Platform.OS != 'web') {
         Storage.setItem(key, item)
         return
@@ -44,6 +72,7 @@ const saveTo = (item: string, key: string) => {
 }
 
 const removeItem = async (itemIndex: string) => {
+    KeyLoader.removeKey(itemIndex)
     if (Platform.OS !== 'web') {
         try {
             await Storage.deleteItemAsync(itemIndex); // SecureStore requires async call
@@ -86,9 +115,7 @@ const saveItem = (key: string, item: any) => {
     console.log(`Saved item to ${key}`);
 
 }
-const loadItem = (key: string): any => {
-    try { return (JSON.parse(loadFrom(key), reviver)) } catch (e) { console.log(e, key); throw e }
-}
+
 
 
 
@@ -106,14 +133,14 @@ const removeTask = (tabname: string, taskindex: string) => {
     console.log("removing: ", taskindex, " from: ", tabname)
     let [tab, tabindex] = getTab(tabname)
     tab = tab.filter((e) => { return (e != taskindex) })
-    saveItem(tabindex,tab)
+    saveItem(tabindex, tab)
     removeItem(taskindex)
 }
 
-const removeTab =  (tabName: string) => {
+const removeTab = (tabName: string) => {
     let map = getTabs()
     var [tab, tabindex] = getTab(tabName)
-    tab.forEach( index => {
+    tab.forEach(index => {
         removeItem(index)
     })
     map.delete(tabName)
@@ -156,13 +183,15 @@ const iterate = (type: string): number | null => {
     }
 }
 const initializeStorage = () => {
-    try { loadItem("tabs") } catch (e) {
-        let tabs: Map<string, string> = new Map<string, string>()
-
-        saveItem("tabs", tabs)
-        createTab("Main Tab")
-    }
-    try{getTab("Main Tab")}catch(e){createTab("Main Tab")}
+        if(! loadItem("tabs") ){
+            console.log("KeyLoader.everyKey isnt empty but 'tabs' doesnt exist")
+            KeyLoader.everyKey.forEach(key=>{
+                removeItem(key)
+            })
+            let tabs: Map<string, string> = new Map<string, string>()
+            saveItem("tabs", tabs)
+            createTab("Main Tab")
+        }
 
 }
 
@@ -179,8 +208,8 @@ const getTab = (tabname: string): [string[], string] => {
     }
     return ([loadItem(tab), tab])
 }
-const createTab = (tabName: string,contents?:string[]) => {
-    if(contents){contents = contents}else{contents = []}
+const createTab = (tabName: string, contents?: string[]) => {
+    if (contents) { contents = contents } else { contents = [] }
     var tabs: Map<string, string> = loadItem("tabs")
     var tabIndex = "tab" + iterate('tab')
     //tabs is a map with name:"pointer"
@@ -271,9 +300,9 @@ const tests = () => {
         }
     )
 }
-// initializeStorage()
-tests()
+initializeStorage()
+//tests()
 
 
 
-export { tests, createTab, getTab, getTabs, getTasks, createTask, initializeStorage, saveTask, loadItem, removeTask,removeTab }
+export { tests, createTab, getTab, getTabs, getTasks, createTask, initializeStorage, saveTask, loadItem, removeTask, removeTab }
