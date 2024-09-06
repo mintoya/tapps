@@ -278,8 +278,8 @@ const tests = () => {
     time: "00:00",
   });
 };
-initializeStorage();
-//tests();
+//initializeStorage()
+tests();
 
 export {
   tests,
